@@ -73,10 +73,12 @@ streamlit run app.py
 | File | What it is |
 |---|---|
 | `app.py` | Streamlit app |
-| `model.pkl` | Trained Random Forest |
-| `3916_final_project_starter.ipynb` | EDA, preprocessing, modeling, evaluation |
+| `model.pkl` | Trained Random Forest (all 11 features) |
+| `model_no_stress.pkl` | Refit without `stress_level`, used by the app's side-by-side ablation view |
+| `3916_final_project_starter.ipynb` | EDA, preprocessing, modeling, ablation, evaluation |
 | `developer_burnout_dataset_7000.csv` | Training data (Kaggle source) |
-| `3916_final_report.pdf` | Full writeup |
+| `3916_final_report.pdf` | Full writeup (PDF) |
+| `3916_final_report.md` | Markdown source for the writeup |
 | `requirements.txt` | Python dependencies |
 | `feature_importance.png` | Feature importance chart used in this README |
 | `confusion_matrix.png` | Held-out test confusion matrix used in this README |
