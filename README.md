@@ -2,45 +2,51 @@
 
 Random Forest classifier that predicts a developer's burnout risk tier (Low / Medium / High) from work patterns and a self-reported stress score. Deployed as a Streamlit app. Final project for ECON 3916 — Statistical & Machine Learning for Economics.
 
-**[Live demo →](https://econ3916-final-project-bpqngzwfdfzo6ycitevyaw.streamlit.app/)** · [Notebook](3916_final_project_starter.ipynb) · [Open in Colab](https://colab.research.google.com/github/ian-menachery/Burnout-App/blob/main/3916_final_project_starter.ipynb)
+**[Live demo →](https://econ3916-final-project-bpqngzwfdfzo6ycitevyaw.streamlit.app/)** · [Notebook](3916_final_project_starter.ipynb) · [Open in Colab](https://colab.research.google.com/github/ian-menachery/Burnout-App/blob/main/3916_final_project_starter.ipynb) · [Full writeup (PDF)](3916_final_report.pdf)
 
 ![Streamlit app screenshot](screenshot.png)
 
 ## The problem
 
-Developer burnout is well-documented but hard to spot early — by the time it shows up in attrition or missed deadlines, the recovery cost is already high. A team lead with twelve direct reports doesn't have time to manually review work-pattern data on each one. The goal here is a screening aid: a model that flags developers who look like they're trending toward burnout, so a human can decide whether to schedule a check-in.
+Most engineering orgs find out about burnout too late — by the time a senior developer gives notice or goes on extended leave, the replacement search and the loss of institutional knowledge are already costs you can't walk back. Industry estimates put replacing a mid-level engineer at 1.5–2× annual salary.
 
-This is a screening tool, not a decision tool. It is not designed for performance reviews, compensation, or any adverse employment action.
+This project asks whether observable work patterns plus a single self-reported stress score can classify a developer into a Low / Medium / High burnout tier accurately enough to support weekly triage by a team lead. The model produces a short-list — which of a team lead's 10–30 reports should get a non-routine workload conversation this cycle. The predicted tier is an input to that conversation, not a substitute for it, and it must not feed into performance reviews, compensation, or any adverse employment decision.
 
 ## Headline result
 
-The Random Forest reaches **macro F1 = 0.991 ± 0.002** on 5-fold cross-validation (n = 7,000). The number on its own is misleading, and the more interesting finding is the reason why:
+The Random Forest reaches **macro F1 = 0.991 ± 0.002** on 5-fold cross-validation (n = 7,000). On the held-out test set, it correctly flagged **351 of 356 High-tier developers (98.6% recall)**. All five misses were labeled Medium, not Low — every missed High still triggers a scheduled check-in. The asymmetry is the right way around for a triage tool: a false High costs a 15-minute conversation; a false Low costs an attrition event.
 
-About **70% of the model's predictive weight comes from a single feature — the self-reported `stress_level` score** (1–10). That feature also correlates 0.49–0.60 with the behavioral features the model is supposedly learning from (daily work hours, screen time, bugs per day). So in practice the classifier is mostly restating self-reported stress rather than predicting independent risk from work patterns.
-
-Put differently: a manager who already has the `stress_level` number probably doesn't need this model. The behavioral features add real but small signal on top.
+The headline F1 needs an asterisk, though. **About 70% of the model's predictive weight comes from a single feature — the self-reported `stress_level` score (1–10).** That feature also correlates 0.49–0.60 with the behavioral features the model is supposedly learning from (daily work hours, screen time, bugs per day). So in practice the classifier is mostly restating self-reported stress rather than predicting independent risk from behavior. A manager who already has the `stress_level` number probably doesn't need this model.
 
 ![Feature importance](feature_importance.png)
 
 ## Approach
 
-- **Data:** [Developer Burnout Prediction Dataset](https://www.kaggle.com/datasets/asifxzaman/developer-burnout-prediction-dataset7000-samples) on Kaggle (n = 7,000, accessed April 2026). Likely synthetic — provenance against a real engineering org could not be verified.
+- **Data:** [Developer Burnout Prediction Dataset](https://www.kaggle.com/datasets/asifxzaman/developer-burnout-prediction-dataset7000-samples) on Kaggle (n = 7,000, accessed April 2026).
 - **Features (11):** age, years of experience, daily work hours, sleep hours, caffeine intake, bugs per day, commits per day, meetings per day, screen time, exercise hours, self-reported stress level.
-- **Target:** continuous `Burn Rate` from the dataset, bucketed into Low / Medium / High tiers. The tier boundaries are an analyst choice, not ground truth.
-- **Models:** Logistic Regression baseline → `RandomForestClassifier` (200 trees, `class_weight="balanced"`, `random_state=42`).
-- **Validation:** 5-fold cross-validation, macro F1 reported (averaged across the three classes).
+- **Target:** continuous `Burn Rate` from the dataset, bucketed into Low / Medium / High at roughly the 33rd / 67th percentiles. The cutoffs are an analyst choice, not ground truth.
+- **Preprocessing:** dropped rows with missing target labels; median imputation on feature columns (chosen over mean because `bugs_per_day` and `caffeine_intake` are mildly right-skewed); 80/20 stratified train/test split with `random_state=42`.
+- **Models:** Multinomial Logistic Regression baseline (`class_weight="balanced"`, `max_iter=2000`) → `RandomForestClassifier` (200 trees, `class_weight="balanced"`).
+- **Validation:** 5-fold CV on the training split, macro F1 reported. Baseline LogReg scored **0.945 ± 0.006**; the Random Forest's **0.991 ± 0.002** is a >3σ gap with ~3× lower variance across folds — not a fold-selection fluke.
 
-Full EDA, preprocessing, model selection, and evaluation are in [`3916_final_project_starter.ipynb`](3916_final_project_starter.ipynb).
+Full analysis: [`3916_final_project_starter.ipynb`](3916_final_project_starter.ipynb). Full writeup: [`3916_final_report.pdf`](3916_final_report.pdf).
 
-## Limitations
+## Threats to validity
 
-These are the same caveats surfaced inside the deployed app.
+| Threat | Evidence | Mitigation |
+|---|---|---|
+| Stress restatement | `stress_level` carries ~70% of Gini importance and correlates 0.60 with daily work hours | Refit without `stress_level` and compare CV performance directly |
+| Likely synthetic source data | Uniform 2% missingness across every column, zero Tukey outliers across 7,000 rows, 99% macro F1 — not what you see in the wild | Validate on internal company data before any production decision |
+| Tier cutoff arbitrariness | Low / Medium / High are analyst-set percentile cuts on a continuous `Burn Rate` | Sensitivity-test alternative cutoffs; use the continuous score where stakes allow |
+| Point-in-time features | The model sees a single snapshot, but burnout is fundamentally a trajectory | Add rolling 4-week trend features before any pilot expansion |
 
-- **The stress_level feature dominates and leaks.** ~70% of model weight on a self-reported measure that correlates 0.49–0.60 with the work-pattern features means the model is largely restating self-reported stress, not learning a separable risk signal from behavior.
-- **The training data is likely synthetic.** Real-world performance on a specific engineering org has not been validated.
-- **Feature importance is predictive, not causal.** Reducing caffeine intake will not reduce someone's predicted burnout tier in the way the model's importance scores might suggest.
-- **Tier boundaries are an analyst choice.** Low / Medium / High are bucketed from the continuous `Burn Rate`. Pushing those thresholds shifts the metric.
-- **Not for adverse decisions.** Performance review, compensation, hiring, and firing are explicitly out of scope.
+Feature importance is predictive, not causal. Reducing caffeine intake will not reduce someone's predicted tier in any meaningful sense. And this tool is a screening aid — never a performance review, compensation, or hiring/firing signal.
+
+## What I'd do next
+
+- **Refit without `stress_level`** and compare CV performance. If the behavior-only version is meaningfully worse, that confirms the stress-restatement concern and the tool only has a defensible use case where self-reports are reliably collected. If it holds up, the tool gets a useful fallback mode for when self-reports are missing or gamed.
+- **Validate on internal company data** before putting real weight on the model. CV on a Kaggle dataset doesn't tell you real-world generalization.
+- **Add longitudinal features** — four-week trends in commit cadence, sleep, and meeting load instead of point-in-time snapshots. Burnout is a trajectory, and a model that can't see trajectories is missing the most useful signal the stakeholder actually cares about.
 
 ## Tech stack
 
@@ -53,7 +59,7 @@ pip install -r requirements.txt
 streamlit run app.py
 ```
 
-`model.pkl` is included in this repo (~6.6 MB), so no separate download step. Tested on Python 3.10+. To re-run the analysis end-to-end, open `3916_final_project_starter.ipynb` (locally or in Colab) — runtime is ~2 minutes on a laptop, no GPU.
+`model.pkl` is included in this repo (~6.6 MB). Tested on Python 3.10+. To re-run the analysis end-to-end, open `3916_final_project_starter.ipynb` (locally or in Colab) — runtime ~2 minutes on a laptop, no GPU.
 
 ## Repo layout
 
@@ -63,6 +69,7 @@ streamlit run app.py
 | `model.pkl` | Trained Random Forest |
 | `3916_final_project_starter.ipynb` | EDA, preprocessing, modeling, evaluation |
 | `developer_burnout_dataset_7000.csv` | Training data (Kaggle source) |
+| `3916_final_report.pdf` | Full writeup |
 | `requirements.txt` | Python dependencies |
 | `feature_importance.png` | Feature importance chart used in this README |
 | `screenshot.png` | App screenshot used in this README |
