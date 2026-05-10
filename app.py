@@ -167,7 +167,7 @@ else:
         f"✓ **Confident prediction** ({margin:.0%} margin over the next tier)."
     )
 
-with st.expander("Model details and limitations"):
+with st.expander("Model details and limitations", expanded=True):
     st.markdown(
         """
 **Model:** Random Forest Classifier (balanced class weights)
