@@ -68,10 +68,10 @@ PROFILES = {
 }
 
 DEFAULTS = {
-    "age": 30, "experience_years": 5, "daily_work_hours": 9.0,
-    "sleep_hours": 7.0, "caffeine_intake": 2, "bugs_per_day": 2,
-    "commits_per_day": 4, "meetings_per_day": 3, "screen_time": 9.0,
-    "exercise_hours": 0.5, "stress_level": 50,
+    "age": 32, "experience_years": 10, "daily_work_hours": 9.0,
+    "sleep_hours": 6.5, "caffeine_intake": 3, "bugs_per_day": 9,
+    "commits_per_day": 14, "meetings_per_day": 4, "screen_time": 12.0,
+    "exercise_hours": 1.0, "stress_level": 50,
 }
 
 for k, v in DEFAULTS.items():
@@ -135,7 +135,7 @@ with st.sidebar:
     st.slider("Caffeine (servings/day)", 0, 10, key="caffeine_intake")
 
     st.markdown("**Self-reported**")
-    st.slider("Stress level (0-100)", 0, 100, key="stress_level")
+    st.slider("Stress level (1-100)", 1, 100, key="stress_level")
 
 # Build inputs from session state
 input_dict = {k: st.session_state[k] for k in FEATURE_COLS}
