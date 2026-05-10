@@ -8,7 +8,7 @@ Random Forest classifier that predicts a developer's burnout risk tier (Low / Me
 
 **[Live demo →](https://econ3916-final-project-bpqngzwfdfzo6ycitevyaw.streamlit.app/)** · [Notebook](3916_final_project_starter.ipynb) · [Open in Colab](https://colab.research.google.com/github/ian-menachery/Burnout-App/blob/main/3916_final_project_starter.ipynb) · [Full writeup (PDF)](3916_final_report.pdf)
 
-![Streamlit app screenshot](screenshot.png)
+![Streamlit app screenshot](screenshot.png?v=2)
 
 ## The problem
 
