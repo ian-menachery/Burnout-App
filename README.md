@@ -16,6 +16,8 @@ This project asks whether observable work patterns plus a single self-reported s
 
 The Random Forest reaches **macro F1 = 0.991 ± 0.002** on 5-fold cross-validation (n = 7,000). On the held-out test set, it correctly flagged **351 of 356 High-tier developers (98.6% recall)**. All five misses were labeled Medium, not Low — every missed High still triggers a scheduled check-in. The asymmetry is the right way around for a triage tool: a false High costs a 15-minute conversation; a false Low costs an attrition event.
 
+![Confusion matrix on held-out test set](confusion_matrix.png)
+
 The headline F1 needs an asterisk, though. **About 70% of the model's predictive weight comes from a single feature — the self-reported `stress_level` score (1–10).** That feature also correlates 0.49–0.60 with the behavioral features the model is supposedly learning from (daily work hours, screen time, bugs per day). So in practice the classifier is mostly restating self-reported stress rather than predicting independent risk from behavior. A manager who already has the `stress_level` number probably doesn't need this model.
 
 ![Feature importance](feature_importance.png)
@@ -77,6 +79,7 @@ streamlit run app.py
 | `3916_final_report.pdf` | Full writeup |
 | `requirements.txt` | Python dependencies |
 | `feature_importance.png` | Feature importance chart used in this README |
+| `confusion_matrix.png` | Held-out test confusion matrix used in this README |
 | `screenshot.png` | App screenshot used in this README |
 
 ## Course context
