@@ -1,5 +1,9 @@
 # Developer Burnout Risk Classifier
 
+[![Python 3.10+](https://img.shields.io/badge/python-3.10%2B-blue?logo=python&logoColor=white)](https://www.python.org/)
+[![License: MIT](https://img.shields.io/badge/license-MIT-green)](LICENSE)
+[![Live Demo](https://img.shields.io/badge/Streamlit-Live%20Demo-FF4B4B?logo=streamlit&logoColor=white)](https://econ3916-final-project-bpqngzwfdfzo6ycitevyaw.streamlit.app/)
+
 Random Forest classifier that predicts a developer's burnout risk tier (Low / Medium / High) from work patterns and a self-reported stress score. Deployed as a Streamlit app. Final project for ECON 3916 — Statistical & Machine Learning for Economics.
 
 **[Live demo →](https://econ3916-final-project-bpqngzwfdfzo6ycitevyaw.streamlit.app/)** · [Notebook](3916_final_project_starter.ipynb) · [Open in Colab](https://colab.research.google.com/github/ian-menachery/Burnout-App/blob/main/3916_final_project_starter.ipynb) · [Full writeup (PDF)](3916_final_report.pdf)
