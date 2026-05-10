@@ -42,9 +42,14 @@ Full analysis: [`3916_final_project_starter.ipynb`](3916_final_project_starter.i
 
 Feature importance is predictive, not causal. Reducing caffeine intake will not reduce someone's predicted tier in any meaningful sense. And this tool is a screening aid — never a performance review, compensation, or hiring/firing signal.
 
+## Validating the stress-restatement concern
+
+Refitting the Random Forest without `stress_level` (same hyperparameters, same CV folds) drops macro F1 from 0.991 to 0.76 — a 24-point fall, with High-tier recall going from 98.6% to 66.8%. The behavioral features carry real independent signal, but not enough to deploy on their own: the behavior-only model also flips the precision/recall asymmetry the wrong way for a triage tool (precision 0.82 > recall 0.67), meaning it would miss about a third of real burnout cases. The honest read is that `stress_level` is doing most of the work, the behavioral features are doing some, and the tool only has a defensible primary use case where the self-report is reliably collected. A behavior-only fallback is plausible when self-reports are missing or gamed, but with an explicit acceptance of the ~67% recall ceiling.
+
+See section 3.5 of [`3916_final_project_starter.ipynb`](3916_final_project_starter.ipynb) for the full comparison.
+
 ## What I'd do next
 
-- **Refit without `stress_level`** and compare CV performance. If the behavior-only version is meaningfully worse, that confirms the stress-restatement concern and the tool only has a defensible use case where self-reports are reliably collected. If it holds up, the tool gets a useful fallback mode for when self-reports are missing or gamed.
 - **Validate on internal company data** before putting real weight on the model. CV on a Kaggle dataset doesn't tell you real-world generalization.
 - **Add longitudinal features** — four-week trends in commit cadence, sleep, and meeting load instead of point-in-time snapshots. Burnout is a trajectory, and a model that can't see trajectories is missing the most useful signal the stakeholder actually cares about.
 
